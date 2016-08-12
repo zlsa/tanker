@@ -1,4 +1,5 @@
 
+var CopyWebpackPlugin = require('copy-webpack-plugin');
 var path = require('path');
 
 module.exports = {
@@ -48,6 +49,24 @@ module.exports = {
       }
     ]
   },
+
+  plugins: [
+    new CopyWebpackPlugin([
+      {
+        'from': 'src/models/',
+        to: 'models/'
+      },
+
+      {
+        'from': 'src/models/',
+        to: 'models/'
+      }
+    ], {
+      ignore: [
+        '*.blend*',
+      ]
+    })
+  ],
   
   resolve: {
     extensions: ['', '.js', '.css'],

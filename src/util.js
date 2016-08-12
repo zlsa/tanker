@@ -72,6 +72,7 @@ function getValue(object, key, default_value) {
 // with callbacks, to make things cleaner.
 
 function withScope(scope, func) {
+  if(!scope || !func) console.warn('withScope() called without both arguments!');
   return function() {
     func.apply(scope, arguments);
   };

@@ -8,6 +8,8 @@ const events = require('./events.js');
 const game = require('./game.js');
 const scene = require('./scene.js');
 
+const loader = require('./loader.js');
+
 class App extends events.Events {
 
   constructor() {
@@ -20,18 +22,27 @@ class App extends events.Events {
       fps: 0
     };
 
-    this.game = new game.Game();
-    this.scene = new scene.Scene();
+    this.loader = new loader.MultiLoader();
 
-    $(document).ready(util.withScope(this, this.loaded));
-    
+    this.loader.on('loaded', util.withScope(this, function() {
+      setTimeout(util.withScope(this, this.loaded), 0);
+    }));
+
+    this.game = new game.Game(this);
+    this.scene = new scene.Scene(this);
+
+    $(document).ready(util.withScope(this, this.ready));
+  }
+
+  ready() {
+    this.scene.loadModels();
   }
 
   loaded() {
     $('body').addClass('loaded');
 
     this.game.start();
-    this.scene.init();
+    this.scene.loaded();
     
     $('#canvas').append(this.scene.element);
     

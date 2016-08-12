@@ -10,11 +10,15 @@ const EffectComposer = require('three-effectcomposer')(THREE);
 const fxaa = require('three-shader-fxaa');
 
 const tank = require('./tank.js');
+const model = require('./model.js');
 
 class Scene extends events.Events {
 
-  constructor() {
+  constructor(app) {
     super();
+
+    this.app = app;
+    this.loader = app.loader;
 
     this.size = {
       width: 1,
@@ -23,7 +27,7 @@ class Scene extends events.Events {
     };
   }
 
-  init() {
+  loaded() {
     this.scene = new THREE.Scene();
 
     this.initCamera();
@@ -68,9 +72,25 @@ class Scene extends events.Events {
   }
 
   initTank() {
-    this.tank = new tank.Tank();
+    this.tank = new tank.Tank(this);
 
     this.scene.add(this.tank.mesh);
+  }
+
+  // Model loading, ugh
+
+  loadModels() {
+    this.models = {};
+
+    this.loadModel('tank', 'tank/tank');
+  }
+
+  loadModel(name, url) {
+    url = './models/' + url + '.json';
+
+    var m = new model.Model(this, url);
+
+    this.models[name] = m;
   }
 
   resize() {
