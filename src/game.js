@@ -15,10 +15,15 @@ class Game extends events.Events {
     this.tanks = [];
 
     this.time = 0;
-    this.time_scale = 1;
+
+    this.options = {
+      timeScale: 1,
+      paused: false
+    };
     
-    this.paused = false;
     this.running = false;
+
+    window.g = this;
   }
 
   loaded() {
@@ -68,8 +73,10 @@ class Game extends events.Events {
   }
 
   tick(elapsed) {
-    this.time += elapsed * this.time_scale;
+    if(this.options.paused) elapsed = 0;
     
+    this.time += elapsed * this.options.timeScale;
+
     for(var i=0; i<this.tanks.length; i++) {
       this.tanks[i].tick(elapsed);
     }

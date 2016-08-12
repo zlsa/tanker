@@ -24,7 +24,8 @@ class Scene extends events.Events {
 
     this.options = {
       scaleFactor: 1,
-      fxaa: false
+      fxaa: false,
+      shadowStart: 100,
     };
 
     this.size = {
@@ -60,11 +61,23 @@ class Scene extends events.Events {
     this.initRenderer();
     
     this.initMaterials();
+
+    this.initSuzanne();
+  }
+
+  initSuzanne() {
+    var mesh = new THREE.Mesh(this.getModel('suzanne'), this.getMaterial('suzanne'));
+    
+    mesh.position.y = 15;
+    
+    this.scene.add(mesh);
+
+    this.suzanne = mesh;
   }
 
   initRenderer() {
     this.renderer = new THREE.WebGLRenderer({
-      antialias: true,
+      // antialias: true,
       alpha: false
     });
 
@@ -96,7 +109,7 @@ class Scene extends events.Events {
   initCamera() {
     this.camera = new THREE.PerspectiveCamera(50, 1, 0.1, 10000);
 
-    this.camera.position.set(0, 10, -30);
+    this.camera.position.set(0, 10, -50);
 
     this.camera.lookAt(new THREE.Vector3(0, 0.5, 0));
 
@@ -110,6 +123,11 @@ class Scene extends events.Events {
   }
 
   initTankMaterials() {
+    this.materials.suzanne = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      map: this.getTexture('suzanne')
+    });
+
     this.materials.tank = new THREE.MeshBasicMaterial({
       color: 0xffffff,
       map: this.getTexture('tank')
@@ -119,7 +137,8 @@ class Scene extends events.Events {
       color: 0x000000,
       transparent: true,
       alphaMap: this.getTexture('tank_shadow'),
-      depthWrite: false
+      depthWrite: false,
+      alphaTest: 0.01
     });
   }
 
@@ -133,9 +152,12 @@ class Scene extends events.Events {
   loadModels() {
     this.models = {};
 
+    this.loadModel('suzanne', 'suzanne/suzanne');
+    
     this.loadModel('tank.0', 'tank/tank.0');
     this.loadModel('tank.1', 'tank/tank.1');
     this.loadModel('tank.2', 'tank/tank.2');
+    this.loadModel('tank.3', 'tank/tank.3');
   }
 
   loadModel(name, url) {
@@ -171,6 +193,8 @@ class Scene extends events.Events {
       this.texture.wrapS = THREE.ClampToEdgeWrapping;
       this.texture.wrapT = THREE.ClampToEdgeWrapping;
     }));
+    
+    texture = this.loadTexture('suzanne', 'models/suzanne/ao.png');
   }
 
   loadTexture(name, url) {
@@ -209,6 +233,15 @@ class Scene extends events.Events {
   render(elapsed) {
     this.updateCamera();
 
+    var angle = this.game.time;
+    var size = 40;
+    var point_at = [Math.sin(angle) * size, Math.cos(angle) * size];
+    var heading = Math.atan2(point_at[0], point_at[1]);
+    
+    this.suzanne.position.x = point_at[0];
+    this.suzanne.position.z = point_at[1];
+    this.suzanne.rotation.y = heading;
+    
     for(var i=0; i<this.game.tanks.length; i++) {
       this.game.tanks[i].renderer.update();
     }
