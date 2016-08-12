@@ -124,6 +124,8 @@ class ImageLoader extends URLLoader {
   loadEvent(event) {
     this.data = this.image;
 
+    this.fire('image-loaded');
+    
     this.setStatus('complete');
 
     this.fire('loaded');
@@ -143,6 +145,23 @@ class ImageLoader extends URLLoader {
 
 }
 
+class TextureLoader extends ImageLoader {
+
+  constructor(url) {
+    super(url);
+
+    this.on('image-loaded', util.withScope(this, this.makeTexture));
+  }
+
+  makeTexture() {
+    this.texture = new THREE.Texture(this.image);
+    this.texture.needsUpdate = true;
+
+    this.data = this.texture;
+  }
+  
+}
+    
 // Loads multiple files, calls back when complete
 
 class MultiLoader extends Loader {
@@ -197,5 +216,6 @@ exports.Loader = Loader;
 exports.JSONLoader = JSONLoader;
 exports.GeometryLoader = GeometryLoader;
 exports.ImageLoader = ImageLoader;
+exports.TextureLoader = TextureLoader;
 exports.MultiLoader = MultiLoader;
 

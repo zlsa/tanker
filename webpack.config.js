@@ -55,12 +55,8 @@ module.exports = {
       {
         'from': 'src/models/',
         to: 'models/'
-      },
-
-      {
-        'from': 'src/models/',
-        to: 'models/'
       }
+
     ], {
       ignore: [
         '*.blend*',

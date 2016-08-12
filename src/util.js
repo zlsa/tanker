@@ -15,18 +15,6 @@ function degrees(radians) {
   return radians * (180 / Math.PI);
 }
 
-// # lerp
-//
-// Interpolates `i` from range `il..ih` to `ol..oh`.
-//
-// ```js
-// lerp(0, 50, 100, -50, 50); // returns 0
-// ```
-
-function lerp(il, i, ih, ol, oh) {
-  return ((i - il) / (ih - il)) * (oh - ol) + ol;
-}
-
 function clamp(a, i, b) {
   if(a > b) {
     var temp = a;
@@ -37,6 +25,18 @@ function clamp(a, i, b) {
   if(a > i) return a;
   if(b < i) return b;
   return i;
+}
+
+// # lerp
+//
+// Interpolates `i` from range `il..ih` to `ol..oh`.
+//
+// ```js
+// lerp(0, 50, 100, -50, 50); // returns 0
+// ```
+
+function lerp(il, i, ih, ol, oh) {
+  return ((i - il) / (ih - il)) * (oh - ol) + ol;
 }
 
 function clerp(il, i, ih, ol, oh) {
@@ -82,7 +82,10 @@ exports.mod = mod;
 exports.time = time;
 exports.radians = radians;
 exports.degrees = degrees;
+
+exports.clamp = clamp;
 exports.lerp = lerp;
 exports.clerp = clerp;
+
 exports.getValue = getValue;
 exports.withScope = withScope;
