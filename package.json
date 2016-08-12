@@ -1,0 +1,34 @@
+{
+  "name": "tanker-game",
+  "author": "Jon Ross <jonross.zlsa@gmail.com> (https://zlsa.github.io/)",
+  "description": "Multiplayer Tank Game",
+  "keywords": [
+    "tank",
+    "game"
+  ],
+  "homepage": "https://zlsa.github.io/tanker-game",
+  "version": "0.0.1",
+  "license": "MIT",
+  "repository": "github:zlsa/tanker-game",
+  "dependencies": {
+    "async": "^2.0.1",
+    "jquery": "^2.2.3",
+    "pf-perlin": "^1.0.4",
+    "three": "^0.79.0",
+    "three-effectcomposer": "0.0.1",
+    "three-shader-fxaa": "^5.1.1",
+    "url-loader": "^0.5.7"
+  },
+  "devDependencies": {
+    "babel-core": "^6.13.2",
+    "babel-loader": "^6.2.4",
+    "babel-preset-es2015": "^6.13.2",
+    "css-loader": "^0.23.1",
+    "file-loader": "^0.8.5",
+    "image-webpack-loader": "^2.0.0",
+    "json-loader": "^0.5.4",
+    "style-loader": "^0.13.1",
+    "transform-loader": "^0.2.3",
+    "webpack": "^1.13.1"
+  }
+}
