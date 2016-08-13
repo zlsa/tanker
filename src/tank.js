@@ -50,6 +50,8 @@ class Tank extends events.Events {
 
   updatePhysics(elapsed) {
     this.throttle = util.clamp(-1, this.throttle, 1);
+    if(this.throttle < 0) this.throttle *= 0.7;
+    
     this.steer = util.clamp(-1, this.steer, 1);
 
     var factor = util.clerp(0, this.zoom, 1, 1, 0.6);
@@ -58,8 +60,8 @@ class Tank extends events.Events {
 
     this.speed = this.throttle * this.maximum.speed * factor;
     
-    this.velocity[0] = Math.sin(this.heading) * this.speed;
-    this.velocity[1] = Math.cos(this.heading) * this.speed;
+    this.velocity[0] = -Math.sin(this.heading) * this.speed;
+    this.velocity[1] = -Math.cos(this.heading) * this.speed;
          
     this.position[0] += this.velocity[0] * elapsed;
     this.position[1] += this.velocity[1] * elapsed;
@@ -214,10 +216,12 @@ class TankRenderer extends events.Events {
 
     var distance = this.v1.distanceTo(this.v2);
 
-    if(distance > this.scene.options.shadowStart) {
+    if(distance > this.scene.options.shadowFadeEnd) {
       this.shadow.visible = false;
     } else {
       this.shadow.visible = true;
+
+      this.shadow.scale.setLength(util.clerp(this.scene.options.shadowFadeStart, distance, this.scene.options.shadowFadeEnd, 2, 0));
     }
     
   }

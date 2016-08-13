@@ -25,7 +25,8 @@ class Scene extends events.Events {
     this.options = {
       scaleFactor: 1,
       fxaa: false,
-      shadowStart: 100,
+      shadowFadeStart: 100,
+      shadowFadeEnd: 200,
     };
 
     this.size = {

@@ -172,7 +172,7 @@ class MouseControl extends Control {
     xy[1] = util.clamp(-1, xy[1], 1);
 
     this.steer = xy[0];
-    this.throttle = xy[1];
+    this.throttle = -xy[1];
   }
 
 }
