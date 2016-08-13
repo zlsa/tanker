@@ -81,9 +81,12 @@ class Scene extends events.Events {
 
   initRenderer() {
     this.renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: false
+      //antialias: true,
+      alpha: false,
+      preserveDrawingBuffer: true
     });
+
+    this.renderer.autoClear = false;
 
     window.THREE = THREE;
 
@@ -285,13 +288,15 @@ class Scene extends events.Events {
     this.updateMapRenderer(elapsed);
 
     this.scene.updateMatrixWorld();
+
+    this.renderer.clear();
     
     if(this.options.fxaa) {
       this.composer.render();
     } else {
       this.renderer.render(this.scene, this.camera);
     }
-    
+
   }
 
 }

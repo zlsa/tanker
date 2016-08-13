@@ -26,7 +26,7 @@ class GameMode extends events.Events {
 
     if(this.autoselect) {
       for(i=0; i<this.autoselect.length; i++) {
-        tank_number[i] = 0;
+        tank_number[this.autoselect[i]] = 0;
       }
     } else {
       for(i in this.teams) {

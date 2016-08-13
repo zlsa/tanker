@@ -124,7 +124,7 @@ class App extends events.Events {
     
     this.game.tick(this.time.elapsed);
     this.scene.render(this.time.elapsed);
-    this.hud.tank.update(this.time.elapsed);
+    this.hud.tank.render(this.time.elapsed);
 
     // NO MORE WORK
     
