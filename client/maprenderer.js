@@ -34,7 +34,8 @@ class MapRenderer extends events.Events {
     this.ground.size = 6000;
     this.ground.repeat = 300;
 
-    this.ground.material = new THREE.MeshBasicMaterial({
+    this.ground.material = new THREE.MeshLambertMaterial({
+      shininess: 0,
       color: 0xffffff,
       map: this.scene.getTexture('ground-grid').clone(),
       transparent: true,

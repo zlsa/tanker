@@ -38,6 +38,8 @@ class Scene extends events.Events {
       aspect: 1
     };
 
+    this.skyColor = 0xbbbbbb;
+
     window.s = this;
   }
 
@@ -74,7 +76,8 @@ class Scene extends events.Events {
 
     this.initCamera();
     this.initRenderer();
-    this.initFog()
+    this.initFog();
+    this.initLights();
     
     this.initMaterials();
   }
@@ -90,7 +93,7 @@ class Scene extends events.Events {
 
     window.THREE = THREE;
 
-    this.renderer.setClearColor(0xaaaaaa, 1.0);
+    this.renderer.setClearColor(this.skyColor, 1.0);
 
     this.initPost();
 
@@ -101,9 +104,19 @@ class Scene extends events.Events {
   }
 
   initFog() {
-    this.fog = new THREE.Fog(0xaaaaaa, 30, 1000);
+    this.fog = new THREE.Fog(this.skyColor, 30, 1000);
     
     this.scene.fog = this.fog;
+  }
+
+  initLights() {
+    this.sun = new THREE.PointLight(new THREE.Color(team.TEAMS.red.color).getHex(), 1.0);
+    this.sun.position.set(0, 5, 0);
+
+    //this.scene.add(this.sun);
+
+    this.hemi = new THREE.HemisphereLight(0xffffff, 0xffffff, 1.0);
+    this.scene.add(this.hemi);
   }
 
   initPost() {
@@ -136,7 +149,7 @@ class Scene extends events.Events {
   }
 
   initTankMaterials() {
-    this.materials.suzanne = new THREE.MeshBasicMaterial({
+    this.materials.suzanne = new THREE.MeshPhongMaterial({
       color: 0xffffff,
       map: this.getTexture('suzanne')
     });
@@ -144,7 +157,8 @@ class Scene extends events.Events {
     var t;
     for(var i in team.TEAMS) {
       t = team.TEAMS[i];
-      this.materials['tank_team_' + i] = new THREE.MeshBasicMaterial({
+      this.materials['tank_team_' + i] = new THREE.MeshPhongMaterial({
+        shininess: 0,
         color: new THREE.Color(t.color).getHex(),
         aoMap: this.getTexture('tank')
       });

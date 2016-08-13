@@ -12,6 +12,8 @@ const loader = require('./loader.js');
 
 const control = require('../common/control.js');
 
+const socket = require('./socket.js');
+
 class App extends events.Events {
 
   constructor() {
@@ -35,6 +37,7 @@ class App extends events.Events {
 
     this.scene = new scene.Scene(this);
     this.game = new game.Game(this);
+    this.socket = new socket.Socket(this);
 
     this.hud = {};
     this.hud.tank = new hud.TankHUD(this);
