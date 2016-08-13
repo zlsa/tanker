@@ -3,7 +3,7 @@ var CopyWebpackPlugin = require('copy-webpack-plugin');
 var path = require('path');
 
 module.exports = {
-  entry: './src/main.js',
+  entry: './client/main.js',
   devtool: 'source-map',
   target: 'web',
   
@@ -53,7 +53,7 @@ module.exports = {
   plugins: [
     new CopyWebpackPlugin([
       {
-        'from': 'src/models/',
+        'from': 'client/models/',
         to: 'models/'
       }
 

@@ -1,5 +1,5 @@
 
-const util = require('./util.js');
+const util = require('../common/util.js');
 
 class Animation {
   

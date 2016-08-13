@@ -1,6 +1,6 @@
 
-const util = require('./util.js');
-const events = require('./events.js');
+const util = require('../common/util.js');
+const events = require('../common/events.js');
 
 const THREE = require('three');
 

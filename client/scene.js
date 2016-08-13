@@ -1,9 +1,8 @@
 
 const $ = require('jquery');
 
-const async = require('async');
-const util = require('./util.js');
-const events = require('./events.js');
+const util = require('../common/util.js');
+const events = require('../common/events.js');
 
 const THREE = require('three');
 const EffectComposer = require('three-effectcomposer')(THREE);
@@ -11,8 +10,11 @@ const fxaa = require('three-shader-fxaa');
 
 const loader = require('./loader.js');
 
-const tank = require('./tank.js');
+const tankrenderer = require('./tankrenderer.js');
+
 const model = require('./model.js');
+
+const team = require('../common/team.js');
 
 class Scene extends events.Events {
 
@@ -51,6 +53,11 @@ class Scene extends events.Events {
   ready() {
     this.loadModels();
     this.loadTextures();
+    this.app.game.on('new-tank', util.withScope(this, this.newTank));
+  }
+
+  newTank(e) {
+    e.tank.addRenderer(this, new tankrenderer.TankRenderer(this, e.tank));
   }
 
   loaded() {
@@ -62,18 +69,6 @@ class Scene extends events.Events {
     this.initRenderer();
     
     this.initMaterials();
-
-    this.initSuzanne();
-  }
-
-  initSuzanne() {
-    var mesh = new THREE.Mesh(this.getModel('suzanne'), this.getMaterial('suzanne'));
-    
-    mesh.position.y = 15;
-    
-    this.scene.add(mesh);
-
-    this.suzanne = mesh;
   }
 
   initRenderer() {
@@ -129,20 +124,14 @@ class Scene extends events.Events {
       map: this.getTexture('suzanne')
     });
 
-    this.materials.tank_neutral = new THREE.MeshBasicMaterial({
-      color: 0xffffff,
-      aoMap: this.getTexture('tank')
-    });
-
-    this.materials.tank_alpha = new THREE.MeshBasicMaterial({
-      color: 0xffaa66,
-      aoMap: this.getTexture('tank')
-    });
-
-    this.materials.tank_beta = new THREE.MeshBasicMaterial({
-      color: 0x66ffaa,
-      aoMap: this.getTexture('tank')
-    });
+    var t;
+    for(var i in team.TEAMS) {
+      t = team.TEAMS[i];
+      this.materials['tank_team_' + i] = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(t.color).getHex(),
+        aoMap: this.getTexture('tank')
+      });
+    }
 
     this.materials.tank_shadow = new THREE.MeshBasicMaterial({
       color: 0x000000,
@@ -250,21 +239,17 @@ class Scene extends events.Events {
     this.camera.updateProjectionMatrix();
   }
 
-  render(elapsed) {
-    this.updateCamera();
-
-    var angle = this.game.time;
-    var size = 40;
-    var point_at = [Math.sin(angle) * size, Math.cos(angle) * size];
-    var heading = Math.atan2(point_at[0], point_at[1]);
+  updateTanks(elapsed) {
+    var tanks = this.game.getTanks();
     
-    this.suzanne.position.x = point_at[0];
-    this.suzanne.position.z = point_at[1];
-    this.suzanne.rotation.y = heading;
-    
-    for(var i=0; i<this.game.tanks.length; i++) {
+    for(var i=0; i<tanks.length; i++) {
       this.game.tanks[i].renderer.update(elapsed);
     }
+  }
+
+  render(elapsed) {
+    this.updateCamera();
+    this.updateTanks(elapsed);
 
     if(this.options.fxaa) {
       this.composer.render();

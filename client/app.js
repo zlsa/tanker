@@ -1,15 +1,16 @@
 
 const $ = require('jquery');
 
-const async = require('async');
-const util = require('./util.js');
-const events = require('./events.js');
+const util = require('../common/util.js');
+const events = require('../common/events.js');
 
-const game = require('./game.js');
+const game = require('../common/game.js');
 const scene = require('./scene.js');
 const hud = require('./hud.js');
 
 const loader = require('./loader.js');
+
+const control = require('../common/control.js');
 
 class App extends events.Events {
 
@@ -38,8 +39,51 @@ class App extends events.Events {
     this.hud = {};
     this.hud.tank = new hud.TankHUD(this);
 
+    this.initControl();
+
+    this.initTank();
+    
     $(document).ready(util.withScope(this, this.ready));
   }
+
+  initTank() {
+
+    this.tank = {
+      view: null,
+      control: null
+    };
+
+    window.g = this;
+  }
+
+  // TANK STUFF
+
+  initControl() {
+    this.control = new control.MultiControl(this.game);
+    this.control.addControl('keyboard', new control.KeyboardControl(this.game), ['throttle', 'steer', 'zoom']);
+    this.control.addControl('mouse', new control.MouseControl(this.game), ['throttle', 'steer']);
+  }
+
+  setViewTank(tank) {
+    this.tank.view = tank;
+    this.scene.camera = tank.renderer.camera;
+
+    this.hud.tank.setTank(tank);
+  }
+
+  setControlTank(tank) {
+    if(this.tank.control) this.tank.control = new control.AutopilotControl();
+    
+    tank.control = this.control;
+    this.tank.control = tank;
+  }
+
+  setPlayerTank(tank) {
+    this.setViewTank(tank);
+    this.setControlTank(tank);
+  }
+
+  // APP STUFF
 
   ready() {
     this.scene.ready();
@@ -57,6 +101,9 @@ class App extends events.Events {
     $('#canvas').append(this.scene.element);
     
     this.time.last = util.time();
+    
+    this.setPlayerTank(this.game.tanks[0]);
+    
     this.tick();
   }
 

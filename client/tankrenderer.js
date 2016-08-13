@@ -1,98 +1,17 @@
 
-const $ = require('jquery');
-
-const async = require('async');
-const util = require('./util.js');
-const events = require('./events.js');
+const util = require('../common/util.js');
+const events = require('../common/events.js');
 
 const THREE = require('three');
 
-const control = require('./control.js');
-
 const animation = require('./animation.js');
-
-class Tank extends events.Events {
-
-  constructor(game) {
-    super();
-
-    this.game = game;
-
-    this.renderer = null;
-
-    this.throttle = 0;
-    this.steer = 0;
-
-    this.zoom = 0;
-
-    this.control = new control.AutopilotControl();
-
-    this.maximum = {
-      speed: 20,
-      steer: 90
-    };
-
-    this.velocity = [0, 0];
-    this.position = [0, 0];
-
-    this.angularVelocity = 0;
-    this.heading = 0;
-  }
-
-  remove() {
-    this.renderer.remove();
-  }
-
-  addRenderer(scene) {
-    if(this.renderer) return;
-    this.renderer = new TankRenderer(scene, this);
-  }
-
-  updatePhysics(elapsed) {
-    this.throttle = util.clamp(-1, this.throttle, 1);
-    if(this.throttle < 0) this.throttle *= 0.7;
-    
-    this.steer = util.clamp(-1, this.steer, 1);
-
-    var factor = util.clerp(0, this.zoom, 1, 1, 0.6);
-
-    // update speed
-
-    this.speed = this.throttle * this.maximum.speed * factor;
-    
-    this.velocity[0] = -Math.sin(this.heading) * this.speed;
-    this.velocity[1] = -Math.cos(this.heading) * this.speed;
-         
-    this.position[0] += this.velocity[0] * elapsed;
-    this.position[1] += this.velocity[1] * elapsed;
-
-    // update heading
-
-    this.angularVelocity = util.radians(this.steer * this.maximum.steer * factor);
-    
-    this.heading -= this.angularVelocity * elapsed;
-  }
-  
-  tick(elapsed) {
-    var angle = this.game.time;
-    var size = 40;
-    var point_at = [Math.sin(angle) * size, Math.cos(angle) * size];
-    
-    // this.heading = Math.atan2(this.position[0] - point_at[0], this.position[1] - point_at[1]);
-
-    this.control.tick(elapsed);
-    this.control.apply(this);
-
-    this.updatePhysics(elapsed);
-  }
-
-}
 
 class TankRenderer extends events.Events {
 
   constructor(scene, tank) {
     super();
 
+    this.app = scene.app;
     this.scene = scene;
     this.tank = tank;
 
@@ -103,7 +22,19 @@ class TankRenderer extends events.Events {
       duration: 0.1
     });
 
+    this.tank.on('team-change', util.withScope(this, this.updateTeam));
+
     this.init();
+  }
+
+  updateTeam() {
+    var team = this.tank.team;
+    
+    var material = 'tank_team_' + team.team;
+
+    for(var i=0; i<this.lod.levels.length; i++) {
+      this.lod.levels[i].object.material = this.scene.getMaterial(material);
+    }
   }
 
   init() {
@@ -111,19 +42,11 @@ class TankRenderer extends events.Events {
     
     this.lod = new THREE.LOD();
 
-    var material = 'tank_neutral';
-
-    if(Math.random() > 0.5) {
-      this.team = 'alpha';
-      material = 'tank_alpha';
-    } else {
-      this.team = 'beta';
-      material = 'tank_beta';
-    }
+    var material = 'tank_team_neutral';
 
     this.lod.addLevel(new THREE.Mesh(this.scene.getModel('tank.0'), this.scene.getMaterial(material)), 0);
-    //this.lod.addLevel(new THREE.Mesh(this.scene.getModel('tank.1'), this.scene.getMaterial(material)), 20);
-    //this.lod.addLevel(new THREE.Mesh(this.scene.getModel('tank.2'), this.scene.getMaterial(material)), 90);
+    this.lod.addLevel(new THREE.Mesh(this.scene.getModel('tank.1'), this.scene.getMaterial(material)), 20);
+    this.lod.addLevel(new THREE.Mesh(this.scene.getModel('tank.2'), this.scene.getMaterial(material)), 130);
     //this.lod.addLevel(new THREE.Mesh(this.scene.getModel('tank.3'), this.scene.getMaterial(material)), 400);
 
     this.initTreads();
@@ -221,7 +144,7 @@ class TankRenderer extends events.Events {
     } else {
       this.shadow.visible = true;
 
-      this.shadow.scale.setLength(util.clerp(this.scene.options.shadowFadeStart, distance, this.scene.options.shadowFadeEnd, 2, 0));
+      this.shadow.scale.setLength(util.clerp(this.scene.options.shadowFadeStart, distance, this.scene.options.shadowFadeEnd, 1.77, 0));
     }
     
   }
@@ -249,21 +172,21 @@ class TankRenderer extends events.Events {
   }
 
   updateTreads(elapsed) {
-    var treadWidth = 4;
+    var treadWidth = 2;
     var uvWidth = 0.8;
 
-    this.treads.left.speed = ((this.tank.speed - (this.tank.angularVelocity * 7) / treadWidth) / uvWidth);
-    this.treads.right.speed = ((this.tank.speed + (this.tank.angularVelocity * 7) / treadWidth) / uvWidth);
+    this.treads.left.speed = ((this.tank.speed + (this.tank.angularVelocity) * treadWidth) / uvWidth);
+    this.treads.right.speed = ((this.tank.speed - (this.tank.angularVelocity) * treadWidth) / uvWidth);
     
     this.updateTreadSpeed(this.treads.left);
     this.updateTreadSpeed(this.treads.right);
 
-    this.treads.left.offset  += this.treads.left.speed * elapsed;
-    this.treads.right.offset += this.treads.right.speed * elapsed;
+    this.treads.left.offset  -= this.treads.left.speed * elapsed;
+    this.treads.right.offset -= this.treads.right.speed * elapsed;
   }
 
   update(elapsed) {
-    if(this.tank == this.tank.game.tank.view) {
+    if(this.tank == this.app.tank.view) {
       this.lod.visible = false;
     } else {
       this.lod.visible = true;
@@ -280,7 +203,4 @@ class TankRenderer extends events.Events {
 
 }
 
-exports.Tank = Tank;
 exports.TankRenderer = TankRenderer;
-
-

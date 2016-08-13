@@ -2,8 +2,8 @@
 const $ = require('jquery');
 
 const async = require('async');
-const util = require('./util.js');
-const events = require('./events.js');
+const util = require('../common/util.js');
+const events = require('../common/events.js');
 
 var KEYCODE = {
   0: 48,
@@ -57,11 +57,10 @@ var KEYCODE = {
 
 class Control extends events.Events {
 
-  constructor(game, tank) {
+  constructor(game) {
     super();
 
     this.game = game;
-    this.tank = tank;
 
     this.throttle = 0;
     this.steer = 0;
@@ -82,8 +81,8 @@ class Control extends events.Events {
 
 class MultiControl extends Control {
 
-  constructor(game, tank) {
-    super(game, tank);
+  constructor(game) {
+    super(game);
 
     this.controls = {};
 
@@ -119,6 +118,10 @@ class MultiControl extends Control {
       'steer',
       'zoom'
     ];
+
+    for(var i in this.controls) {
+      this.controls[i].tick(elapsed);
+    }
     
     for(var i=0; i<controls.length; i++) {
       var control = controls[i];
@@ -127,7 +130,7 @@ class MultiControl extends Control {
       if(active)
         this[control] = this.controls[active][control];
     }
-         
+    
     super.tick(elapsed);
   }
   
@@ -135,24 +138,30 @@ class MultiControl extends Control {
 
 class AutopilotControl extends Control {
 
-  constructor(game, tank) {
-    super(game, tank);
+  constructor(game) {
+    super(game);
 
+    this.active = false;
+    
     if(Math.random() > 0.8) {
-      this.throttle = Math.random() * 2 - 1;
-      this.steer = Math.random() * 2 - 1;
+      this.steer = 1;
+      if(Math.random() > 0.5) this.steer = -1;
+      
+      this.throttle = 0.2;
     }
+    
   }
 
   tick(elapsed) {
+    super.tick(elapsed);
   }
 
 }
 
 class MouseControl extends Control {
 
-  constructor(game, tank) {
-    super(game, tank);
+  constructor(game) {
+    super(game);
 
     $(window).mousemove(util.withScope(this, this.mousemove));
   }
@@ -179,8 +188,8 @@ class MouseControl extends Control {
 
 class KeyboardControl extends Control {
 
-  constructor(game, tank) {
-    super(game, tank);
+  constructor(game) {
+    super(game);
 
     this.keys = {};
 
@@ -196,8 +205,8 @@ class KeyboardControl extends Control {
 
   keydown(e) {
     if(!(e.which in this.keys))
-        this.keys[e.which] = 0;
-      
+      this.keys[e.which] = 0;
+    
     this.keys[e.which] += 1;
     
     this.fire('keydown', {
@@ -208,6 +217,26 @@ class KeyboardControl extends Control {
 
   keyup(e) {
     this.keys[e.which] = 0;
+  }
+
+  tick(elapsed) {
+    if(this.keys[KEYCODE.DOWN]) {
+      this.throttle = -1;
+    } else if(this.keys[KEYCODE.UP]) {
+      this.throttle = 1;
+    } else {
+      this.throttle = 0;
+    }
+    
+    if(this.keys[KEYCODE.LEFT]) {
+      this.steer = -1;
+    } else if(this.keys[KEYCODE.RIGHT]) {
+      this.steer = 1;
+    } else {
+      this.steer = 0;
+    }
+    
+    super.tick(elapsed);
   }
 
 }

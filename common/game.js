@@ -1,11 +1,10 @@
 
-const async = require('async');
 const util = require('./util.js');
 const events = require('./events.js');
 
 const tank = require('./tank.js');
 
-const control = require('./control.js');
+const gamemode = require('./gamemode.js');
 
 class Game extends events.Events {
 
@@ -16,25 +15,23 @@ class Game extends events.Events {
 
     this.tanks = [];
 
-    this.time = 0;
-
     this.options = {
       timeScale: 1,
       paused: false
     };
     
+    this.time = 0;
     this.running = false;
 
-    this.tank = {
-      view: null,
-      control: null
-    };
+    this.initGameMode();
+  }
 
-    this.control = new control.MultiControl(this);
-    this.control.addControl('mouse', new control.MouseControl(), ['throttle', 'steer']);
-    this.control.addControl('keyboard', new control.KeyboardControl(), ['zoom']);
+  initGameMode() {
+    this.gamemode = new gamemode.DeathmatchGameMode(this);
+  }
 
-    window.g = this;
+  getTanks() {
+    return this.tanks;
   }
 
   loaded() {
@@ -52,40 +49,24 @@ class Game extends events.Events {
 
     for(var y=0; y<total; y++) {
       for(var x=0; x<total; x++) {
-        t = this.createTank();
+        t = new tank.Tank(this);
         t.position[0] = (x - (total * 0.5) + 0.5) * 15;
         t.position[1] = (y - (total * 0.5) + 0.5) * 15;
 
-        this.tanks.push(t);
+        this.addTank(t);
+        
+        this.gamemode.autoSelectTeam(t);
       }
     }
     
-    this.setPlayerTank(this.tanks[this.tanks.length-1]);
   }
 
-  setViewTank(tank) {
-    this.tank.view = tank;
-    this.app.scene.camera = tank.renderer.camera;
+  addTank(tank) {
+    this.tanks.push(tank);
 
-    this.app.hud.tank.setTank(tank);
-  }
-
-  setControlTank(tank) {
-    if(this.tank.control) this.tank.control = new control.AutopilotControl();
-    
-    tank.control = this.control;
-    this.tank.control = tank;
-  }
-
-  setPlayerTank(tank) {
-    this.setViewTank(tank);
-    this.setControlTank(tank);
-  }
-
-  createTank() {
-    var t = new tank.Tank(this);
-    t.addRenderer(this.app.scene);
-    return t;
+    this.fire('new-tank', {
+      tank: tank
+    });
   }
 
   removeAllTanks() {

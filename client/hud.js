@@ -1,7 +1,6 @@
 
-const async = require('async');
-const util = require('./util.js');
-const events = require('./events.js');
+const util = require('../common/util.js');
+const events = require('../common/events.js');
 
 const THREE = require('three');
 
@@ -299,7 +298,7 @@ class MapPanel extends Panel {
       heading = viewTank.heading;
     }
 
-    var s = 4;
+    var s = 2;
 
     this.context.save();
     
@@ -317,16 +316,12 @@ class MapPanel extends Panel {
     var width = 2;
     var height = 5;
 
-    for(var i=0; i<this.hud.app.game.tanks.length; i++) {
-      tank = this.hud.app.game.tanks[i];
+    var tanks = this.hud.app.game.getTanks();
 
-      this.context.fillStyle = 'black';
+    for(var i=0; i<tanks.length; i++) {
+      tank = tanks[i];
 
-      if(tank.renderer.team == 'alpha') {
-        this.context.fillStyle = '#ffaa66';
-      } else if(tank.renderer.team == 'beta') {
-        this.context.fillStyle = '#66ffaa';
-      }
+      this.context.fillStyle = tank.team.color;
       
       if(tank == viewTank) {
         this.context.fillStyle = 'white';
