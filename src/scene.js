@@ -83,7 +83,7 @@ class Scene extends events.Events {
 
     window.THREE = THREE;
 
-    this.renderer.setClearColor(0xcccccc, 1.0);
+    this.renderer.setClearColor(0xaaaaaa, 1.0);
 
     this.initPost();
 

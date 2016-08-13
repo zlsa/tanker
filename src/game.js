@@ -66,6 +66,8 @@ class Game extends events.Events {
   setViewTank(tank) {
     this.tank.view = tank;
     this.app.scene.camera = tank.renderer.camera;
+
+    this.app.hud.tank.setTank(tank);
   }
 
   setControlTank(tank) {

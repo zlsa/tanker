@@ -7,6 +7,7 @@ const events = require('./events.js');
 
 const game = require('./game.js');
 const scene = require('./scene.js');
+const hud = require('./hud.js');
 
 const loader = require('./loader.js');
 
@@ -34,6 +35,9 @@ class App extends events.Events {
     this.scene = new scene.Scene(this);
     this.game = new game.Game(this);
 
+    this.hud = {};
+    this.hud.tank = new hud.TankHUD(this);
+
     $(document).ready(util.withScope(this, this.ready));
   }
 
@@ -45,6 +49,7 @@ class App extends events.Events {
     $('body').addClass('loaded');
 
     this.scene.loaded();
+    this.hud.tank.loaded();
     this.game.loaded();
     
     this.game.start();
@@ -53,6 +58,11 @@ class App extends events.Events {
     
     this.time.last = util.time();
     this.tick();
+  }
+
+  addPanel(name, panel) {
+    this.panels[name] = panel;
+    this.hud.tank.addPanel(panel);
   }
 
   tick() {
@@ -67,6 +77,7 @@ class App extends events.Events {
     
     this.game.tick(this.time.elapsed);
     this.scene.render(this.time.elapsed);
+    this.hud.tank.update(this.time.elapsed);
 
     // NO MORE WORK
     

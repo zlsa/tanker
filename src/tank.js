@@ -98,20 +98,24 @@ class TankRenderer extends events.Events {
     this.v2 = new THREE.Vector3();
 
     this.zoom_animation = new animation.Animation({
-      duration: 0.5
+      duration: 0.1
     });
 
     this.init();
   }
 
   init() {
+    this.object = new THREE.Object3D();
+    
     this.lod = new THREE.LOD();
 
     var material = 'tank_neutral';
 
     if(Math.random() > 0.5) {
+      this.team = 'alpha';
       material = 'tank_alpha';
     } else {
+      this.team = 'beta';
       material = 'tank_beta';
     }
 
@@ -122,7 +126,8 @@ class TankRenderer extends events.Events {
 
     this.initTreads();
 
-    this.scene.scene.add(this.lod);
+    this.scene.scene.add(this.object);
+    this.object.add(this.lod);
 
     this.initShadow();
     this.initCamera();
@@ -198,6 +203,7 @@ class TankRenderer extends events.Events {
       this.zoom_animation.setValue(this.tank.zoom, this.tank.game.time);
     
     this.camera.fov = util.clerp(0, this.zoom_animation.get(this.tank.game.time), 1, 60, 20);
+    //this.camera.fov += util.clerp(-1, (this.tank.speed / this.tank.maximum.speed), 1, -5, 5);
   }
 
   updateLOD() {
@@ -263,9 +269,9 @@ class TankRenderer extends events.Events {
     this.updateLOD();
     this.updateTreads(elapsed);
     
-    this.lod.position.x = this.tank.position[0];
-    this.lod.position.z = this.tank.position[1];
-    this.lod.rotation.y = this.tank.heading;
+    this.object.position.x = this.tank.position[0];
+    this.object.position.z = this.tank.position[1];
+    this.object.rotation.y = this.tank.heading;
   }
 
 }
