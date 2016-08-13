@@ -77,7 +77,7 @@ class Scene extends events.Events {
 
   initRenderer() {
     this.renderer = new THREE.WebGLRenderer({
-      // antialias: true,
+      antialias: true,
       alpha: false
     });
 
@@ -107,7 +107,7 @@ class Scene extends events.Events {
   }
 
   initCamera() {
-    this.camera = new THREE.PerspectiveCamera(50, 1, 0.1, 10000);
+    this.camera = new THREE.PerspectiveCamera(60, 1, 0.1, 10000);
 
     this.camera.position.set(0, 10, -50);
 
@@ -128,9 +128,19 @@ class Scene extends events.Events {
       map: this.getTexture('suzanne')
     });
 
-    this.materials.tank = new THREE.MeshBasicMaterial({
+    this.materials.tank_neutral = new THREE.MeshBasicMaterial({
       color: 0xffffff,
-      map: this.getTexture('tank')
+      aoMap: this.getTexture('tank')
+    });
+
+    this.materials.tank_alpha = new THREE.MeshBasicMaterial({
+      color: 0xffaa66,
+      aoMap: this.getTexture('tank')
+    });
+
+    this.materials.tank_beta = new THREE.MeshBasicMaterial({
+      color: 0x66ffaa,
+      aoMap: this.getTexture('tank')
     });
 
     this.materials.tank_shadow = new THREE.MeshBasicMaterial({
@@ -153,6 +163,8 @@ class Scene extends events.Events {
     this.models = {};
 
     this.loadModel('suzanne', 'suzanne/suzanne');
+    
+    this.loadModel('treads', 'tank/tread.0');
     
     this.loadModel('tank.0', 'tank/tank.0');
     this.loadModel('tank.1', 'tank/tank.1');
@@ -181,12 +193,19 @@ class Scene extends events.Events {
     var texture = this.loadTexture('tank', 'models/tank/textures/ao/ao.png');
 
     texture.on('loaded', util.withScope(texture, function() {
-      this.texture.wrapS = THREE.RepeatWrapping;
-      this.texture.wrapT = THREE.ClampToEdgeWrapping;
       this.texture.minFilter = THREE.LinearFilter;
       this.texture.anisotropy = 8;
     }));
 
+    for(var i=0; i<4; i++) {
+      texture = this.loadTexture('tread.' + i, 'models/tank/textures/tread/tread.' + i + '.png');
+
+      texture.on('loaded', util.withScope(texture, function() {
+        this.texture.wrapS = THREE.RepeatWrapping;
+        this.texture.wrapT = THREE.RepeatWrapping;
+      }));
+    }
+    
     texture = this.loadTexture('tank_shadow', 'models/tank/textures/ao/shadow.png');
 
     texture.on('loaded', util.withScope(texture, function() {
@@ -243,7 +262,7 @@ class Scene extends events.Events {
     this.suzanne.rotation.y = heading;
     
     for(var i=0; i<this.game.tanks.length; i++) {
-      this.game.tanks[i].renderer.update();
+      this.game.tanks[i].renderer.update(elapsed);
     }
 
     if(this.options.fxaa) {

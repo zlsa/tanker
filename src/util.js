@@ -43,6 +43,10 @@ function clerp(il, i, ih, ol, oh) {
   return lerp(il, clamp(il, i, ih), ih, ol, oh);
 }
 
+function slerp(il, i, ih, ol, oh) {
+  return lerp(-1, Math.sin(lerp(il, i, ih, -Math.PI/2, Math.PI/2)), 1, ol, oh);
+}
+
 // # getValue
 // Gets a value from an object with the option to have a default
 // value. If no default value or key is present, `null` is returned.
@@ -86,6 +90,7 @@ exports.degrees = degrees;
 exports.clamp = clamp;
 exports.lerp = lerp;
 exports.clerp = clerp;
+exports.slerp = slerp;
 
 exports.getValue = getValue;
 exports.withScope = withScope;

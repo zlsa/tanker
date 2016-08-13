@@ -5,6 +5,8 @@ const events = require('./events.js');
 
 const tank = require('./tank.js');
 
+const control = require('./control.js');
+
 class Game extends events.Events {
 
   constructor(app) {
@@ -23,6 +25,15 @@ class Game extends events.Events {
     
     this.running = false;
 
+    this.tank = {
+      view: null,
+      control: null
+    };
+
+    this.control = new control.MultiControl(this);
+    this.control.addControl('mouse', new control.MouseControl(), ['throttle', 'steer']);
+    this.control.addControl('keyboard', new control.KeyboardControl(), ['zoom']);
+
     window.g = this;
   }
 
@@ -35,7 +46,7 @@ class Game extends events.Events {
     this.removeAllTanks();
     this.tanks = [];
 
-    var total = 10;
+    var total = 6;
 
     var t;
 
@@ -48,6 +59,25 @@ class Game extends events.Events {
         this.tanks.push(t);
       }
     }
+    
+    this.setPlayerTank(this.tanks[this.tanks.length-1]);
+  }
+
+  setViewTank(tank) {
+    this.tank.view = tank;
+    this.app.scene.camera = tank.renderer.camera;
+  }
+
+  setControlTank(tank) {
+    if(this.tank.control) this.tank.control = new control.AutopilotControl();
+    
+    tank.control = this.control;
+    this.tank.control = tank;
+  }
+
+  setPlayerTank(tank) {
+    this.setViewTank(tank);
+    this.setControlTank(tank);
   }
 
   createTank() {
