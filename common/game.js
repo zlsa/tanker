@@ -6,12 +6,12 @@ const tank = require('./tank.js');
 
 const gamemode = require('./gamemode.js');
 
+const map = require('./map.js');
+
 class Game extends events.Events {
 
-  constructor(app) {
+  constructor() {
     super();
-
-    this.app = app;
 
     this.tanks = [];
 
@@ -19,11 +19,35 @@ class Game extends events.Events {
       timeScale: 1,
       paused: false
     };
+
+    this.map = null;
     
     this.time = 0;
     this.running = false;
 
     this.initGameMode();
+  }
+
+  switchMap(map) {
+    if(this.map) this.destroyMap();
+
+    this.setMap(map);
+  }
+
+  setMap(map) {
+    this.map = map;
+
+    this.fire('new-map', {
+      map: map
+    });
+  }
+
+  destroyMap() {
+    this.fire('destroy-map', {
+      map: this.map
+    });
+    
+    this.map.destroy();
   }
 
   initGameMode() {
@@ -35,12 +59,13 @@ class Game extends events.Events {
   }
 
   loaded() {
+    this.switchMap(new map.Map());
     this.initTanks();
   }
 
   initTanks() {
 
-    this.removeAllTanks();
+    this.destroyAllTanks();
     this.tanks = [];
 
     var total = 6;
@@ -69,9 +94,9 @@ class Game extends events.Events {
     });
   }
 
-  removeAllTanks() {
+  destroyAllTanks() {
     for(var i=0; i<this.tanks.length; i++) {
-      this.tanks[i].remove();
+      this.tanks[i].destroy();
     }
 
     this.tanks = [];

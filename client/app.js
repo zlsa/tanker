@@ -102,7 +102,7 @@ class App extends events.Events {
     
     this.time.last = util.time();
     
-    this.setPlayerTank(this.game.tanks[0]);
+    this.setPlayerTank(this.game.tanks[this.game.tanks.length-1]);
     
     this.tick();
   }

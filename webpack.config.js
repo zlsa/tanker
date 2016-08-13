@@ -55,6 +55,11 @@ module.exports = {
       {
         'from': 'client/models/',
         to: 'models/'
+      },
+      
+      {
+        'from': 'client/textures/',
+        to: 'textures/'
       }
 
     ], {

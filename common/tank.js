@@ -61,8 +61,9 @@ class Tank extends events.Events {
     });
   }
 
-  remove() {
-    this.renderer.remove();
+  destroy() {
+    this.fire('destroy');
+    delete this;
   }
 
   addRenderer(scene, renderer) {

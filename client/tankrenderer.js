@@ -23,6 +23,7 @@ class TankRenderer extends events.Events {
     });
 
     this.tank.on('team-change', util.withScope(this, this.updateTeam));
+    this.tank.on('destroy', util.withScope(this, this.destroy));
 
     this.init();
   }
@@ -99,6 +100,8 @@ class TankRenderer extends events.Events {
     this.shadow = new THREE.Mesh(shadow_geometry, this.scene.getMaterial('tank_shadow'));
     this.shadow.rotation.x = Math.PI * 0.5;
     this.shadow.rotation.y = Math.PI;
+    
+    this.shadow.renderOrder = 300;
 
     this.lod.add(this.shadow);
   }
@@ -118,8 +121,8 @@ class TankRenderer extends events.Events {
     this.camera.rotation.set(0, 0, 0);
   }
 
-  remove() {
-    this.lod.remove(this.shadow);
+  destroy() {
+    //this.lod.remove(this.shadow);
     this.scene.scene.remove(this.lod);
   }
 
@@ -144,7 +147,9 @@ class TankRenderer extends events.Events {
     } else {
       this.shadow.visible = true;
 
-      this.shadow.scale.setLength(util.clerp(this.scene.options.shadowFadeStart, distance, this.scene.options.shadowFadeEnd, 1.77, 0));
+      var fade = util.clerp(this.scene.options.shadowFadeStart, distance, this.scene.options.shadowFadeEnd, 1.73205, 0);
+      
+      this.shadow.scale.setLength(fade);
     }
     
   }

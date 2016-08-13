@@ -169,7 +169,7 @@ class MouseControl extends Control {
   mousemove(e) {
     var xy = [e.pageX, e.pageY];
 
-    var boxsize = 256;
+    var boxsize = Math.min(window.innerWidth, window.innerHeight) * 0.5;
 
     xy[0] -= window.innerWidth * 0.5;
     xy[1] -= window.innerHeight * 0.5;

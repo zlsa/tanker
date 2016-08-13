@@ -11,6 +11,7 @@ const fxaa = require('three-shader-fxaa');
 const loader = require('./loader.js');
 
 const tankrenderer = require('./tankrenderer.js');
+const maprenderer = require('./maprenderer.js');
 
 const model = require('./model.js');
 
@@ -53,11 +54,17 @@ class Scene extends events.Events {
   ready() {
     this.loadModels();
     this.loadTextures();
+    
     this.app.game.on('new-tank', util.withScope(this, this.newTank));
+    this.app.game.on('new-map', util.withScope(this, this.newMap));
   }
 
   newTank(e) {
     e.tank.addRenderer(this, new tankrenderer.TankRenderer(this, e.tank));
+  }
+
+  newMap(e) {
+    e.map.addRenderer(this, new maprenderer.MapRenderer(this, e.map));
   }
 
   loaded() {
@@ -67,6 +74,7 @@ class Scene extends events.Events {
 
     this.initCamera();
     this.initRenderer();
+    this.initFog()
     
     this.initMaterials();
   }
@@ -87,6 +95,12 @@ class Scene extends events.Events {
     $(window).resize(util.withScope(this, this.resize));
     
     this.element = this.renderer.domElement;
+  }
+
+  initFog() {
+    this.fog = new THREE.Fog(0xaaaaaa, 30, 1000);
+    
+    this.scene.fog = this.fog;
   }
 
   initPost() {
@@ -187,6 +201,9 @@ class Scene extends events.Events {
       this.texture.anisotropy = 8;
     }));
 
+    texture = this.loadTexture('ground-grid', 'textures/ground/grid.png');
+    texture = this.loadTexture('ground-alpha', 'textures/ground/alpha.png');
+    
     for(var i=0; i<4; i++) {
       texture = this.loadTexture('tread.' + i, 'models/tank/textures/tread/tread.' + i + '.png');
 
@@ -234,12 +251,19 @@ class Scene extends events.Events {
     this.size.aspect = this.size.width / this.size.height;
   }
 
+  getCameraPosition() {
+    var vector = new THREE.Vector3();
+    vector.setFromMatrixPosition(this.camera.matrixWorld);
+    
+    return vector;
+  }
+
   updateCamera() {
     this.camera.aspect = this.size.aspect;
     this.camera.updateProjectionMatrix();
   }
 
-  updateTanks(elapsed) {
+  updateTankRenderers(elapsed) {
     var tanks = this.game.getTanks();
     
     for(var i=0; i<tanks.length; i++) {
@@ -247,10 +271,21 @@ class Scene extends events.Events {
     }
   }
 
-  render(elapsed) {
-    this.updateCamera();
-    this.updateTanks(elapsed);
+  updateMapRenderer(elapsed) {
+    var r = this.game.map.renderer;
+    if(r)
+      r.update();
+  }
 
+  render(elapsed) {
+    this.scene.updateMatrixWorld();
+    
+    this.updateCamera();
+    this.updateTankRenderers(elapsed);
+    this.updateMapRenderer(elapsed);
+
+    this.scene.updateMatrixWorld();
+    
     if(this.options.fxaa) {
       this.composer.render();
     } else {

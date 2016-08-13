@@ -81,7 +81,7 @@ class Panel extends events.Events {
 
     this.hud = hud;
 
-    this.size = [512, 512];
+    this.size = [256, 256];
 
     this.canvas = document.createElement('canvas');
     this.context = this.canvas.getContext('2d');
@@ -99,6 +99,8 @@ class Panel extends events.Events {
 
   createWindow() {
     this.texture = new THREE.Texture(this.canvas);
+    this.texture.magFilter = THREE.NearestFilter;
+    this.texture.minFilter = THREE.NearestMipMapNearestFilter;
 
     var plane = new THREE.PlaneGeometry(1, 1, 1);
     
@@ -129,7 +131,7 @@ class Panel extends events.Events {
 
   updateTexture() {
     this.texture.needsUpdate = true;
-    this.window.material.needsUpdate = true;
+    //this.window.material.needsUpdate = true;
   }
 
   draw() {
@@ -353,7 +355,7 @@ class MapPanel extends Panel {
     
     this.context.strokeStyle = '#777';
     this.context.lineWidth = 1;
-    this.context.arc(this.size[0]/2, this.size[1]/2, this.size[0]/2 - 1, 0, Math.PI * 2);
+    this.context.arc(this.size[0]/2, this.size[1]/2, this.size[0]/2 - 2, 0, Math.PI * 2);
 
     this.context.fillStyle = 'rgba(255, 255, 255, 0.05)';
     

@@ -13,11 +13,9 @@
   "dependencies": {
     "async": "^2.0.1",
     "jquery": "^2.2.3",
-    "pf-perlin": "^1.0.4",
     "three": "^0.79.0",
     "three-effectcomposer": "0.0.1",
     "three-shader-fxaa": "^5.1.1",
-    "tinycolor2": "^1.4.1",
     "url-loader": "^0.5.7"
   },
   "devDependencies": {
