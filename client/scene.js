@@ -38,6 +38,9 @@ class Scene extends events.Events {
       aspect: 1
     };
 
+    this.scalePid = new util.PID(0.1);
+    this.scalePid.set_target(60);
+    
     this.skyColor = 0xbbbbbb;
 
     this.scene = new THREE.Scene();
@@ -301,6 +304,11 @@ class Scene extends events.Events {
   }
 
   render(elapsed) {
+    if(this.app.time.fps < 45 && this.app.frames > 100)
+      this.setScaleFactor(this.options.scaleFactor - 0.01);
+    else if(this.app.time.fps > 55)
+      this.setScaleFactor(this.options.scaleFactor + 0.01);
+         
     this.scene.updateMatrixWorld();
     
     this.updateCamera();
