@@ -1,6 +1,8 @@
+'use strict'
 
 const util = require('./util.js');
 const events = require('./events.js');
+const merge = require('merge');
 
 const tank = require('./tank.js');
 
@@ -8,10 +10,14 @@ const gamemode = require('./gamemode.js');
 
 const map = require('./map.js');
 
-class Game extends events.Events {
+const net = require('./net.js');
+
+class Game extends net.Net {
 
   constructor() {
     super();
+
+    this.playerTank = null;
 
     this.tanks = [];
 
@@ -23,9 +29,47 @@ class Game extends events.Events {
     this.map = null;
     
     this.time = 0;
-    this.running = false;
 
-    this.initGameMode();
+    this.gamemode = new gamemode.DeathmatchGameMode(this);
+  }
+
+  pack() {
+    var tanks = [];
+
+    for(var i=0; i<this.tanks.length; i++) {
+      tanks.push(this.tanks[i].pack());
+    }
+    
+    var p = {
+      options: this.options,
+      time: this.time,
+      tanks: tanks
+    }
+
+    return merge(super.pack(), p);
+  }
+
+  unpack(d) {
+    super.unpack(d);
+
+    this.time = d.time;
+    this.options = d.options;
+
+    var t;
+
+    this.unpackTanks(d.tanks);
+
+    return this;
+  }
+
+  initServer() {
+    this.switchMap(new map.Map());
+    //this.initDummyTanks();
+  }
+
+  initClient() {
+    this.switchMap(new map.Map());
+    this.initClientTank();
   }
 
   switchMap(map) {
@@ -50,40 +94,78 @@ class Game extends events.Events {
     this.map.destroy();
   }
 
-  initGameMode() {
-    this.gamemode = new gamemode.DeathmatchGameMode(this);
-  }
-
   getTanks() {
     return this.tanks;
   }
 
-  loaded() {
-    this.switchMap(new map.Map());
-    this.initTanks();
+  initClientTank() {
+    var t = new tank.Tank(this);
+    t.setRemote(false);
+    this.addTank(t);
+
+    console.log('local client is ' + t.id);
+
+    this.playerTank = t;
+
+    this.fire('player-tank', {
+      tank: t
+    });
+    
+    this.gamemode.autoSelectTeam(t);
   }
 
-  initTanks() {
+  initDummyTanks() {
 
-    this.destroyAllTanks();
-    this.tanks = [];
+    var t = new tank.Tank(this);
+    this.gamemode.setTeam(t, 'red');
+    this.addTank(t);
+    
+    return;
+    var max = 0;
+    
+    for(var i=0; i<max; i++) {
+      var t = new tank.Tank(this);
+      t.position[0] = (i - 0.5 - max * 0.5) * 10;
+      t.position[1] = Math.sin(i) * 10;
 
-    var total = 6;
-
-    var t;
-
-    for(var y=0; y<total; y++) {
-      for(var x=0; x<total; x++) {
-        t = new tank.Tank(this);
-        t.position[0] = (x - (total * 0.5) + 0.5) * 15;
-        t.position[1] = (y - (total * 0.5) + 0.5) * 15;
-
-        this.addTank(t);
-        
-        this.gamemode.autoSelectTeam(t);
-      }
+      this.gamemode.autoSelectTeam(t);
+      
+      this.addTank(t);
     }
     
+  }
+
+  getTank(id) {
+    for(var i=0; i<this.tanks.length; i++) {
+      if(this.tanks[i].id == id) return this.tanks[i];
+    }
+  }
+
+  unpackTanks(d) {
+
+    var i;
+
+    for(i=0; i<d.length; i++) {
+      this.unpackTank(d[i]);
+    }
+    
+  }
+
+  unpackTank(d) {
+    var t = this.getTank(d.id);
+
+    if(this.where == 'client' && t && t.remote == false) {
+      return;
+    }
+
+    if(!t) {
+      t = new tank.Tank(this);
+      this.addTank(t);
+    }
+
+    t.setRemote(true);
+    
+    t.unpack(d);
   }
 
   addTank(tank) {
@@ -94,6 +176,15 @@ class Game extends events.Events {
     });
   }
 
+  destroyTank(t) {
+    for(var i=0; i<this.tanks.length; i++) {
+      if(this.tanks[i] == t) {
+        this.tanks[i].destroy();
+        this.tanks.splice(i, 1);
+      }
+    }
+  }
+
   destroyAllTanks() {
     for(var i=0; i<this.tanks.length; i++) {
       this.tanks[i].destroy();
@@ -102,15 +193,24 @@ class Game extends events.Events {
     this.tanks = [];
   }
 
-  stop() {
-    this.running = false;
-  }
+  cullTanks() {
+    
+    var t;
 
-  start() {
-    this.running = true;
+    for(var i=this.tanks.length-1; i>0; i--) {
+      t = this.tanks[i];
+
+      if(t.last_update < this.time - 1) {
+        this.destroyTank(t);
+      }
+      
+    }
+
   }
 
   tick(elapsed) {
+    this.cullTanks();
+    
     if(this.options.paused) elapsed = 0;
     
     this.time += elapsed * this.options.timeScale;
@@ -118,7 +218,7 @@ class Game extends events.Events {
     for(var i=0; i<this.tanks.length; i++) {
       this.tanks[i].tick(elapsed);
     }
-    
+
   }
 
 }

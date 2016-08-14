@@ -46,7 +46,7 @@ class App extends events.Events {
 
     this.initTank();
     
-    $(document).ready(util.withScope(this, this.ready));
+    $(document).ready(util.withScope(this, this.documentReady));
   }
 
   initTank() {
@@ -68,6 +68,11 @@ class App extends events.Events {
   }
 
   setViewTank(tank) {
+    if(!tank) {
+      console.warn('no such tank!');
+      return;
+    }
+    
     this.tank.view = tank;
     this.scene.camera = tank.renderer.camera;
 
@@ -75,6 +80,11 @@ class App extends events.Events {
   }
 
   setControlTank(tank) {
+    if(!tank) {
+      console.warn('no such tank!');
+      return;
+    }
+    
     if(this.tank.control) this.tank.control = new control.AutopilotControl();
     
     tank.control = this.control;
@@ -88,26 +98,29 @@ class App extends events.Events {
 
   // APP STUFF
 
-  ready() {
-    this.scene.ready();
+  documentReady() {
+    this.scene.documentReady();
   }
 
   loaded() {
     $('body').addClass('loaded');
 
+    this.game.on('player-tank', util.withScope(this, function(e) {
+      this.setPlayerTank(e.tank);
+    }));
+    
     this.scene.loaded();
     this.hud.tank.loaded();
-    this.game.loaded();
     
-    this.game.start();
+    this.game.init();
     
     $('#canvas').append(this.scene.element);
     
     this.time.last = util.time();
-    
-    this.setPlayerTank(this.game.tanks[this.game.tanks.length-1]);
-    
+
     this.tick();
+
+    this.socket.connect();
   }
 
   addPanel(name, panel) {
@@ -133,11 +146,10 @@ class App extends events.Events {
     
     this.time.last = this.time.now;
 
-    if(this.time.bucket >= 2) {
+    if(this.time.bucket >= 0.5) {
       this.time.fps = this.time.bucket_frames / this.time.bucket;
       this.time.bucket = 0;
       this.time.bucket_frames = 0;
-      console.log(this.time.fps);
     }
 
     requestAnimationFrame(util.withScope(this, this.tick));

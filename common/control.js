@@ -1,3 +1,4 @@
+'use strict'
 
 const $ = require('jquery');
 
@@ -136,6 +137,14 @@ class MultiControl extends Control {
   
 }
 
+class RemoteControl extends Control {
+
+  constructor(game) {
+    super(game);
+  }
+
+}
+
 class AutopilotControl extends Control {
 
   constructor(game) {
@@ -143,16 +152,13 @@ class AutopilotControl extends Control {
 
     this.active = false;
     
-    if(Math.random() > 0.8) {
-      this.steer = 1;
-      if(Math.random() > 0.5) this.steer = -1;
-      
-      this.throttle = 0.2;
-    }
+    this.throttle = 0.2;
     
   }
 
   tick(elapsed) {
+    this.steer = Math.sin(this.game.time);
+    
     super.tick(elapsed);
   }
 
@@ -244,6 +250,7 @@ class KeyboardControl extends Control {
 exports.Control = Control;
 exports.MultiControl = MultiControl;
 exports.AutopilotControl = AutopilotControl;
+exports.RemoteControl = RemoteControl;
 exports.MouseControl = MouseControl;
 exports.KeyboardControl = KeyboardControl;
 

@@ -1,3 +1,4 @@
+'use strict'
 
 function mod(n) {
   return ((this%n)+n)%n;
@@ -13,6 +14,10 @@ function radians(degrees) {
 
 function degrees(radians) {
   return radians * (180 / Math.PI);
+}
+
+function lowpass(current, target, speed, elapsed) {
+  return current + (target - current) / (speed / elapsed);
 }
 
 function clamp(a, i, b) {
@@ -86,6 +91,8 @@ exports.mod = mod;
 exports.time = time;
 exports.radians = radians;
 exports.degrees = degrees;
+
+exports.lowpass = lowpass;
 
 exports.clamp = clamp;
 exports.lerp = lerp;

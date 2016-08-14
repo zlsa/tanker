@@ -40,6 +40,8 @@ class Scene extends events.Events {
 
     this.skyColor = 0xbbbbbb;
 
+    this.scene = new THREE.Scene();
+
     window.s = this;
   }
 
@@ -53,12 +55,9 @@ class Scene extends events.Events {
     this.options.fxaa = fxaa;
   }
 
-  ready() {
+  documentReady() {
     this.loadModels();
     this.loadTextures();
-    
-    this.app.game.on('new-tank', util.withScope(this, this.newTank));
-    this.app.game.on('new-map', util.withScope(this, this.newMap));
   }
 
   newTank(e) {
@@ -72,14 +71,15 @@ class Scene extends events.Events {
   loaded() {
     this.game = this.app.game;
     
-    this.scene = new THREE.Scene();
-
     this.initCamera();
     this.initRenderer();
     this.initFog();
     this.initLights();
     
     this.initMaterials();
+
+    this.app.game.on('new-tank', util.withScope(this, this.newTank));
+    this.app.game.on('new-map', util.withScope(this, this.newMap));
   }
 
   initRenderer() {
@@ -282,16 +282,22 @@ class Scene extends events.Events {
 
   updateTankRenderers(elapsed) {
     var tanks = this.game.getTanks();
+
+    var renderer;
     
     for(var i=0; i<tanks.length; i++) {
-      this.game.tanks[i].renderer.update(elapsed);
+      renderer = this.game.tanks[i].renderer;
+      
+      if(!renderer) continue;
+      renderer.update(elapsed);
     }
+    
   }
 
   updateMapRenderer(elapsed) {
     var r = this.game.map.renderer;
-    if(r)
-      r.update();
+    
+    if(r) r.update();
   }
 
   render(elapsed) {

@@ -111,19 +111,20 @@ class TankRenderer extends events.Events {
 
     this.lod.add(this.camera);
     
-    if(false) {
+    if(true) {
       this.camera.position.set(0, 3.03, -0.2);
     } else {
       // this.scene.camera.position.set(0, 2.7, -1.0);
       this.camera.position.set(0, 2.4, 0);
     }
     
+    this.camera.position.set(0, 6, 15);
     this.camera.rotation.set(0, 0, 0);
   }
 
   destroy() {
-    //this.lod.remove(this.shadow);
-    this.scene.scene.remove(this.lod);
+    console.log('i will die ' + this.tank.id);
+    this.scene.scene.remove(this.object);
   }
 
   updateZoom() {
@@ -192,7 +193,7 @@ class TankRenderer extends events.Events {
 
   update(elapsed) {
     if(this.tank == this.app.tank.view) {
-      this.lod.visible = false;
+      //this.lod.visible = false;
     } else {
       this.lod.visible = true;
     }

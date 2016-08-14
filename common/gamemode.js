@@ -1,11 +1,14 @@
+'use strict'
 
 const async = require('async');
 const util = require('./util.js');
 const events = require('./events.js');
 
+const net = require('./net.js');
+
 const team = require('./team.js');
 
-class GameMode extends events.Events {
+class GameMode extends net.Net {
 
   constructor(game) {
     super();
@@ -16,6 +19,32 @@ class GameMode extends events.Events {
     };
 
     this.autoselect = null;
+  }
+
+  pack() {
+    var teams = {};
+
+    for(var i in this.teams) {
+      teams[i] = this.teams[i].pack();
+    }
+    
+    var p = {
+      teams: teams
+    };
+    
+    return merge(super.pack(), p);
+  }
+
+  unpack(d) {
+    super.unpack(d);
+
+    this.teams = {};
+
+    for(var i in d.teams) {
+      this.teams[i] = new team.Team().unpack(d.teams[i]);
+    }
+    
+    return this;
   }
 
   autoSelectTeam(tank) {
@@ -54,11 +83,19 @@ class GameMode extends events.Events {
 
     tank_number_array.sort();
 
-    tank.setTeam(this.teams[tank_number_array[0][1]]);
+    this.setTeam(tank, tank_number_array[0][1]);
+  }
+
+  setTeam(tank, team) {
+    tank.setTeam(this.teams[team]);
   }
 
   addTeam(team) {
     this.teams[team.team] = team;
+    
+    this.fire('new-team', {
+      team: team
+    });
   }
 
   tick(elapsed) {

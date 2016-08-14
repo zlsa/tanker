@@ -1,17 +1,27 @@
 'use strict'
 
 const express = require('express');
-const app = express();
-const server = require('http').Server(app);
+const eapp = express();
+const server = require('http').Server(eapp);
 const io = require('socket.io')(server);
 
 const path = require('path');
 
-app.use(express.static(__dirname + '/../build/'));
+const app = require('./app.js');
 
-server.listen(8080);
+// setup
+
+const PORT = 8080;
+
+var a = new app.App();
+
+eapp.use(express.static(__dirname + '/../build/'));
+
+server.listen(PORT, function() {
+  console.log('listening at ' + PORT);
+});
 
 io.on('connection', function(socket) {
-  console.log('foobar');
+  a.newConnection(socket);
 });
 

@@ -1,3 +1,4 @@
+'use strict'
 
 class Events {
 
@@ -20,6 +21,10 @@ class Events {
   }
 
   fire(ev, data) {
+    if(ev != '*') {
+      this.fire('*', data);
+    }
+    
     this.events[ev] = this.events[ev] || [];
     
     for(var i=0; i<this.events[ev].length; i++) {

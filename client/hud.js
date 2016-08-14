@@ -272,7 +272,7 @@ class MapPanel extends Panel {
       heading = viewTank.heading;
     }
 
-    var s = 1.0;
+    var s = 2.0;
 
     this.context.save();
     
@@ -288,7 +288,7 @@ class MapPanel extends Panel {
     this.context.globalCompositeOperation = 'lighter';
     
     var width = 2;
-    var height = 5;
+    var height = 18;
 
     var tanks = this.hud.app.game.getTanks();
 
