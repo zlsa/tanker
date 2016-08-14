@@ -161,11 +161,10 @@ class AutopilotControl extends Control {
     this.active = false;
     
     this.throttle = 1.0;
-    
   }
 
   tick(elapsed) {
-    this.steer = Math.sin(this.game.time);
+    this.steer = Math.sin(this.game.time) + (Math.random() - 0.5);
     
     super.tick(elapsed);
   }

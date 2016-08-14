@@ -181,8 +181,7 @@ class TankRenderer extends events.Events {
     var treadWidth = 2;
     var uvWidth = 0.8;
 
-    var speed = -Math.sin(this.tank.heading) * this.tank.velocity[0] +
-                -Math.cos(this.tank.heading) * this.tank.velocity[1]
+    var speed = this.tank.speed;
 
     this.treads.left.speed = ((speed + (this.tank.angularVelocity) * treadWidth) / uvWidth);
     this.treads.right.speed = ((speed - (this.tank.angularVelocity) * treadWidth) / uvWidth);

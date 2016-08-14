@@ -120,14 +120,13 @@ class Game extends net.Net {
     //this.gamemode.setTeam(t, 'red');
     //this.addTank(t);
 
-    return;
-
     var max = 12;
 
     for(var i=0; i<max; i++) {
       var t = new tank.Tank(this);
       
-      t.position[0] = i * 10;
+      t.remote_position[0] = i * 10;
+      
       t.bot = true;
 
       this.gamemode.setTeam(t, 'red');

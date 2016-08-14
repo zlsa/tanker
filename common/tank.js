@@ -189,25 +189,20 @@ class Tank extends net.Net {
   }
   
   tick(elapsed) {
-    var angle = this.game.time;
-    var size = 40;
-    var point_at = [Math.sin(angle) * size, Math.cos(angle) * size];
-    
-    // this.heading = Math.atan2(this.position[0] - point_at[0], this.position[1] - point_at[1]);
-
     this.control.tick(elapsed);
     this.control.apply(this);
 
     this.updatePhysics(elapsed);
 
-    if(this.remote && this.where == 'client' && false) {
+    if(this.remote && this.where == 'client') {
       this.position[0] = util.lowpass(this.position[0], this.remote_position[0], 0.1, elapsed);
       this.position[1] = util.lowpass(this.position[1], this.remote_position[1], 0.1, elapsed);
       
-      this.heading = util.lowpass(this.heading, this.remote_heading, 0.1, elapsed);
+      this.heading = util.lowpass(this.heading, this.remote_heading, 0.05, elapsed);
     } else {
       this.position[0] = this.remote_position[0];
       this.position[1] = this.remote_position[1];
+      
       this.heading = this.remote_heading;
     }
 

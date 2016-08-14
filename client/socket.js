@@ -43,7 +43,6 @@ class Socket extends events.Events {
 
   getTanks(message) {
     this.game.unpackTanks(message);
-    window.z = message[0];
   }
 
   gotGameState(message) {
