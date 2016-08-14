@@ -7,6 +7,8 @@ const util = require('../common/util.js');
 const events = require('../common/events.js');
 
 var KEYCODE = {
+  SPACE: 32,
+  
   0: 48,
   1: 49,
   2: 50,
@@ -44,6 +46,7 @@ var KEYCODE = {
   X: 88,
   Y: 89,
   Z: 90,
+  
   LEFT: 37,
   UP: 38,
   RIGHT: 39,
@@ -66,12 +69,14 @@ class Control extends events.Events {
     this.throttle = 0;
     this.steer = 0;
     this.zoom = 0;
+    this.turbo = 0;
   }
 
   apply(tank) {
     tank.throttle = this.throttle;
     tank.steer = this.steer;
     tank.zoom = this.zoom;
+    tank.turbo = this.turbo;
   }
 
   tick(elapsed) {
@@ -143,6 +148,9 @@ class RemoteControl extends Control {
     super(game);
   }
 
+  apply() {
+  }
+
 }
 
 class AutopilotControl extends Control {
@@ -152,7 +160,7 @@ class AutopilotControl extends Control {
 
     this.active = false;
     
-    this.throttle = 0.2;
+    this.throttle = 1.0;
     
   }
 
@@ -232,6 +240,12 @@ class KeyboardControl extends Control {
       this.throttle = 1;
     } else {
       this.throttle = 0;
+    }
+    
+    if(this.keys[KEYCODE.SPACE]) {
+      this.turbo = 1;
+    } else {
+      this.turbo = 0;
     }
     
     if(this.keys[KEYCODE.LEFT]) {

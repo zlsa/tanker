@@ -111,7 +111,7 @@ class TankRenderer extends events.Events {
 
     this.lod.add(this.camera);
     
-    if(true) {
+    if(false) {
       this.camera.position.set(0, 3.03, -0.2);
     } else {
       // this.scene.camera.position.set(0, 2.7, -1.0);
@@ -181,9 +181,12 @@ class TankRenderer extends events.Events {
     var treadWidth = 2;
     var uvWidth = 0.8;
 
-    this.treads.left.speed = ((this.tank.speed + (this.tank.angularVelocity) * treadWidth) / uvWidth);
-    this.treads.right.speed = ((this.tank.speed - (this.tank.angularVelocity) * treadWidth) / uvWidth);
-    
+    var speed = -Math.sin(this.tank.heading) * this.tank.velocity[0] +
+                -Math.cos(this.tank.heading) * this.tank.velocity[1]
+
+    this.treads.left.speed = ((speed + (this.tank.angularVelocity) * treadWidth) / uvWidth);
+    this.treads.right.speed = ((speed - (this.tank.angularVelocity) * treadWidth) / uvWidth);
+
     this.updateTreadSpeed(this.treads.left);
     this.updateTreadSpeed(this.treads.right);
 
@@ -204,6 +207,7 @@ class TankRenderer extends events.Events {
     
     this.object.position.x = this.tank.position[0];
     this.object.position.z = this.tank.position[1];
+    
     this.object.rotation.y = this.tank.heading;
   }
 

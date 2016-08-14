@@ -14,6 +14,7 @@ class Tank extends net.Net {
     super();
 
     this.remote = false;
+    this.bot = false;
     
     this.game = game;
 
@@ -25,6 +26,8 @@ class Tank extends net.Net {
     this.steer = 0;
 
     this.zoom = 0;
+    
+    this.turbo = 0;
 
     // CONTROL
 
@@ -49,11 +52,9 @@ class Tank extends net.Net {
 
     this.speed = 0;
 
-    this.remote_speed = 0;
     this.remote_position = [0, 0];
-    this.remote_angularVelocity = 0;
     this.remote_heading = 0;
-    
+
     this.velocity = [0, 0];
     this.position = [0, 0];
 
@@ -80,6 +81,7 @@ class Tank extends net.Net {
       throttle: this.throttle,
       steer: this.steer,
       zoom: this.zoom,
+      turbo: this.turbo,
 
       speed: this.speed,
       velocity: this.velocity,
@@ -104,12 +106,13 @@ class Tank extends net.Net {
     this.throttle = d.throttle;
     this.steer = d.steer;
     this.zoom = d.zoom;
+    this.turbo = d.turbo;
     
-    this.remote_speed = d.speed;
+    this.speed = d.speed;
     this.velocity = d.velocity;
     this.remote_position = d.position;
     
-    this.remote_angularVelocity = d.angularVelocity;
+    this.angularVelocity = d.angularVelocity;
     this.remote_heading = d.heading;
 
     return this;
@@ -149,15 +152,15 @@ class Tank extends net.Net {
     var step = (this.maximum.speed / this.acceleration.speed) * elapsed;
 
     var target_speed = this.throttle * this.maximum.speed * factor;
-    
-    if(Math.abs(target_speed) < Math.abs(this.remote_speed)) step *= this.acceleration.decel;
 
-    if(Math.abs(this.remote_speed - target_speed) < step) {
-      this.remote_speed = target_speed;
+    if(Math.abs(target_speed) < Math.abs(this.speed)) step *= this.acceleration.decel;
+
+    if(Math.abs(this.speed - target_speed) < step) {
+      this.speed = target_speed;
     } else if(target_speed > this.speed) {
-      this.remote_speed += step;
+      this.speed += step;
     } else {
-      this.remote_speed -= step;
+      this.speed -= step;
     }
 
     this.velocity[0] = -Math.sin(this.heading) * this.speed;
@@ -172,17 +175,17 @@ class Tank extends net.Net {
 
     var target_angularVelocity = util.radians(this.steer * this.maximum.steer * factor);
 
-    if(Math.abs(target_angularVelocity) < Math.abs(this.remote_angularVelocity)) step *= this.acceleration.decel;
+    if(Math.abs(target_angularVelocity) < Math.abs(this.angularVelocity)) step *= this.acceleration.decel;
 
-    if(Math.abs(this.remote_angularVelocity - target_angularVelocity) < step) {
-      this.remote_angularVelocity = target_angularVelocity;
-    } else if(target_angularVelocity > this.remote_angularVelocity) {
-      this.remote_angularVelocity += step;
+    if(Math.abs(this.angularVelocity - target_angularVelocity) < step) {
+      this.angularVelocity = target_angularVelocity;
+    } else if(target_angularVelocity > this.angularVelocity) {
+      this.angularVelocity += step;
     } else {
-      this.remote_angularVelocity -= step;
+      this.angularVelocity -= step;
     }
 
-    this.remote_heading -= this.remote_angularVelocity * elapsed;
+    this.remote_heading -= this.angularVelocity * elapsed;
   }
   
   tick(elapsed) {
@@ -197,22 +200,17 @@ class Tank extends net.Net {
 
     this.updatePhysics(elapsed);
 
-    if(this.remote && this.where == 'client') {
-      this.speed = util.lowpass(this.speed, this.remote_speed, 0.05, elapsed);
+    if(this.remote && this.where == 'client' && false) {
+      this.position[0] = util.lowpass(this.position[0], this.remote_position[0], 0.1, elapsed);
+      this.position[1] = util.lowpass(this.position[1], this.remote_position[1], 0.1, elapsed);
       
-      this.position[0] = util.lowpass(this.position[0], this.remote_position[0], 0.03, elapsed);
-      this.position[1] = util.lowpass(this.position[1], this.remote_position[1], 0.03, elapsed);
-      
-      this.angularVelocity = util.lowpass(this.angularVelocity, this.remote_angularVelocity, 0.05, elapsed);
-
-      this.heading = util.lowpass(this.heading, this.remote_heading, 0.05, elapsed);
+      this.heading = util.lowpass(this.heading, this.remote_heading, 0.1, elapsed);
     } else {
-      this.speed = this.remote_speed;
-      this.angularVelocity = this.remote_angularVelocity;
-      
-      this.position = this.remote_position;
+      this.position[0] = this.remote_position[0];
+      this.position[1] = this.remote_position[1];
       this.heading = this.remote_heading;
     }
+
   }
 
 }

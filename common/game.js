@@ -64,7 +64,7 @@ class Game extends net.Net {
 
   initServer() {
     this.switchMap(new map.Map());
-    //this.initDummyTanks();
+    this.initDummyTanks();
   }
 
   initClient() {
@@ -116,19 +116,21 @@ class Game extends net.Net {
 
   initDummyTanks() {
 
-    var t = new tank.Tank(this);
-    this.gamemode.setTeam(t, 'red');
-    this.addTank(t);
-    
+    //var t = new tank.Tank(this);
+    //this.gamemode.setTeam(t, 'red');
+    //this.addTank(t);
+
     return;
-    var max = 0;
-    
+
+    var max = 12;
+
     for(var i=0; i<max; i++) {
       var t = new tank.Tank(this);
-      t.position[0] = (i - 0.5 - max * 0.5) * 10;
-      t.position[1] = Math.sin(i) * 10;
+      
+      t.position[0] = i * 10;
+      t.bot = true;
 
-      this.gamemode.autoSelectTeam(t);
+      this.gamemode.setTeam(t, 'red');
       
       this.addTank(t);
     }
@@ -200,7 +202,7 @@ class Game extends net.Net {
     for(var i=this.tanks.length-1; i>0; i--) {
       t = this.tanks[i];
 
-      if(t.last_update < this.time - 1) {
+      if(t.last_update < this.time - 1 && !t.bot) {
         this.destroyTank(t);
       }
       
